@@ -22,7 +22,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.init import xavier_uniform_
 from torch.nn.functional import log_softmax
-from bleu_score import *
+from bleu import *
 
 
 def load_dictionary(filename: str):
