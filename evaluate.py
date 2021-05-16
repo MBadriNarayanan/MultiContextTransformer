@@ -22,7 +22,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.init import xavier_uniform_
 from torch.nn.functional import log_softmax
-from bleu_score import *
+from bleu_tspnet import *
 
 
 def load_dictionary(filename: str):
@@ -94,28 +94,24 @@ def modify_dataframe(original_filename: str, updated_filename: str):
     return dataframe
 
 
-def get_key(value):
-    global word_dict
+def get_key(word_dict, value):
     for k, v in word_dict.items():
         if v == value:
             return k
     return "<OOV>"
 
 
-def get_sentence(sentence):
+def get_sentence(word_dict, sentence):
     sentence = list(sentence)
-    sentence = [get_key(i.item()) for i in sentence[0]]
+    sentence = [get_key(word_dict, i.item()) for i in sentence[0]]
     sentence = sentence[1:]
     sentence.pop()
     return sentence
 
 
 def model_validation(
-    dataset_generator, smoothing: bool, threshold: float, file_path: str
+    dataset_generator, smoothing: bool, threshold: float, file_path: str, device, word_dict, model
 ):
-    global device
-    global word_dict
-    global model
     uni_gram = []
     bi_gram = []
     tri_gram = []
@@ -139,50 +135,37 @@ def model_validation(
         span12src = span12src.permute(1, 0, 2)
         span16src = span16src.permute(1, 0, 2)
 
-        target = torch.tensor([word_dict["SOS"]]).reshape(1, 1)
-        target = target.type(torch.LongTensor).to(device)
-
-        predicted_token = len(word_dict) + 100
-
+        prediction_tensor = torch.tensor([word_dict['SOS']]).reshape(1, 1)
+        prediction_tensor = prediction_tensor.type(torch.LongTensor).to(device)
+        predicted_token = 2950
         counter = 0
-
-        while predicted_token != word_dict["EOS"] and counter < 100:
-            y_pred = model(span8src, span12src, span16src, target)
-            y_pred = log_softmax(y_pred, dim=1)
-            y_pred = y_pred.permute(0, 2, 1).reshape(y_pred.shape[2], y_pred.shape[1])
-            y_hat_argmax = torch.argmax(y_pred, dim=1)
+        while predicted_token != word_dict['EOS'] and counter < 100 :
+            y_pred = model(span8src, span12src, span16src, prediction_tensor) 
+            y_pred = log_softmax(y_pred , dim = 1)
+            y_pred = y_pred.permute(0,2,1).reshape(y_pred.shape[2],y_pred.shape[1]) 
+            y_hat_argmax = torch.argmax(y_pred , dim = 1)
             counter = counter + 1
             predicted_token = y_hat_argmax[-1].item()
-            new_prediction = torch.Tensor([predicted_token]).reshape(1, 1)
+            new_prediction = torch.Tensor([predicted_token]).reshape(1 , 1)
             new_prediction = new_prediction.type(torch.LongTensor).to(device)
-            target = torch.cat((target, new_prediction), dim=1)
-
+            prediction_tensor = torch.cat((prediction_tensor , new_prediction) , dim = 1)
         del y_hat_argmax, new_prediction
         del y_pred
         del predicted_token
-        ground_truth = get_sentence(targets)
-        ground_truth.append(".")
-        ground_truth = " ".join(ground_truth)
-        prediction = get_sentence(target)
-        predict = " ".join(prediction)
+        ground_truth = get_sentence(word_dict, targets)
+        ground_truth.append('.')
+        gt = ' '.join(ground_truth)
+        prediction = get_sentence(word_dict, prediction_tensor)
+        predict = ' '.join(prediction)
         file.write("Sentence %d out of 642\n" % (i + 1))
-        file.write("Ground Truth : " + ground_truth + "\n")
-        file.write("Prediction : " + predict + "\n")
+        file.write("Ground Truth: " + gt + "\n")
+        file.write("Prediction: " + predict + "\n")
         file.write("-----------------------------------\n")
-
-        bleu_1, _, _, _, _, _ = compute_bleu(
-            [[ground_truth]], [prediction], max_order=1, smooth=smoothing
-        )
-        bleu_2, _, _, _, _, _ = compute_bleu(
-            [[ground_truth]], [prediction], max_order=2, smooth=smoothing
-        )
-        bleu_3, _, _, _, _, _ = compute_bleu(
-            [[ground_truth]], [prediction], max_order=3, smooth=smoothing
-        )
-        bleu_4, _, _, _, _, _ = compute_bleu(
-            [[ground_truth]], [prediction], max_order=4, smooth=smoothing
-        )
-
+        bleu_1, _,_,_,_,_ = compute_bleu([[ground_truth]], [prediction], max_order = 1, smooth=smoothing)
+        bleu_2, _,_,_,_,_= compute_bleu([[ground_truth]], [prediction], max_order = 2, smooth=smoothing)
+        bleu_3, _,_,_,_,_ = compute_bleu([[ground_truth]], [prediction], max_order = 3, smooth=smoothing)
+        bleu_4, _,_,_,_,_ = compute_bleu([[ground_truth]], [prediction], max_order = 4, smooth=smoothing)
+        
         uni_gram.append(bleu_1)
         bi_gram.append(bleu_2)
         tri_gram.append(bleu_3)
@@ -197,41 +180,40 @@ def model_validation(
         if bleu_4 > threshold:
             four_gram_above_threshold.append(bleu_4)
 
-        del inputs, targets, target
+        del inputs, targets, prediction_tensor
         del span8src, span12src, span16src
         del ground_truth, prediction
-        del ground_truth, predict
+        del gt, predict   
 
-    file.write("Total Uni Gram: ", len(uni_gram), "\n")
-    file.write("Total Bi Gram: ", len(bi_gram), "\n")
-    file.write("Total Tri Gram: ", len(tri_gram), "\n")
-    file.write("Total Four Gram: ", len(four_gram), "\n")
+    file.write("Total Uni Gram: %d \n" % (len(uni_gram)))
+    file.write("Total Bi Gram: %d \n" % (len(bi_gram)))
+    file.write("Total Tri Gram: %d \n" % (len(tri_gram)))
+    file.write("Total Four Gram: %d \n" % (len(four_gram)))
     file.write(
-        "Total Uni Gram Above %f: %d\n" % (threshold, len(uni_gram_above_threshold))
+        "Total Uni Gram Above %.2f: %d\n" % (threshold, len(uni_gram_above_threshold))
     )
     file.write(
-        "Total Bi Gram Above %f: %d\n" % (threshold, len(bi_gram_above_threshold))
+        "Total Bi Gram Above %.2f: %d\n" % (threshold, len(bi_gram_above_threshold))
     )
     file.write(
-        "Total Tri Gram Above %f: %d\n" % (threshold, len(tri_gram_above_threshold))
+        "Total Tri Gram Above %.2f: %d\n" % (threshold, len(tri_gram_above_threshold))
     )
     file.write(
-        "Total Four Gram Above %f: %d\n" % (threshold, len(four_gram_above_threshold))
+        "Total Four Gram Above %.2f: %d\n" % (threshold, len(four_gram_above_threshold))
     )
 
     uni_gram = np.array(uni_gram)
-    file.write("BLEU 1: %.2f\n" % (np.average(uni_gram)))
-
+    file.write("BLEU 1: %.3f\n" % (np.average(uni_gram)))
+    
     bi_gram = np.array(bi_gram)
-    file.write("BLEU 2: %.2f\n" % (np.average(bi_gram)))
-
+    file.write("BLEU 2: %.3f\n" % (np.average(bi_gram)))
+    
     tri_gram = np.array(tri_gram)
-    file.write("BLEU 3: %.2f\n" % (np.average(tri_gram)))
+    file.write("BLEU 3: %.3f\n" % (np.average(tri_gram)))
 
     four_gram = np.array(four_gram)
-    file.write("BLEU 4: %.2f\n" % (np.average(four_gram)))
-
-
+    file.write("BLEU 4: %.3f\n" % (np.average(four_gram)))
+    
 def main():
     if len(sys.argv) != 2:
         print("Pass JSON file of model as argument!")
@@ -319,10 +301,13 @@ def main():
     loss = checkpoint["loss"]
     model.eval()
     model_validation(
-        generator=test_gen,
+        dataset_generator=test_gen,
         threshold=hyper_params["evaluation"]["threshold"],
         smoothing=hyper_params["evaluation"]["smoothing"],
         file_path=hyper_params["evaluation"]["predictionsFilePath"],
+        device=device,
+        word_dict=word_dict,
+        model=model
     )
 
 
