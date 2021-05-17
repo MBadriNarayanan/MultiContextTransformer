@@ -170,11 +170,11 @@ def model_validation(
     rouge_score = rouge(pred_list, gt_list)
     rouge_l = rouge_score["rouge_l/f_score"]
     rouge_l = round(rouge_l * 100, 2)
-    file.write("BLEU 1: %f\n" % (bleu[0]))
-    file.write("BLEU 2: %f\n" % (bleu[1]))
-    file.write("BLEU 3: %f\n" % (bleu[2]))
-    file.write("BLEU 4: %f\n" % (bleu[3]))
-    file.write("ROUGE L: %f \n" % (rouge_l))
+    file.write("BLEU 1: %.2f\n" % (bleu[0]))
+    file.write("BLEU 2: %.2f\n" % (bleu[1]))
+    file.write("BLEU 3: %.2f\n" % (bleu[2]))
+    file.write("BLEU 4: %.2f\n" % (bleu[3]))
+    file.write("ROUGE L: %.2f\n" % (rouge_l))
     del gt_list, pred_list
     del bleu, rouge_score
     del rouge_l
@@ -278,3 +278,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    print("\n--------------------\nEvaluation Complete!\n--------------------\n")

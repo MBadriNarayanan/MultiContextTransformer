@@ -311,3 +311,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    print("\n--------------------\nTraining Complete!\n--------------------\n")
