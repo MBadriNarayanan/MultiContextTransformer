@@ -274,9 +274,6 @@ def main():
             del yhat, targets1, zeros
             del modified_targets
             if btch % 1000 == 0:
-                print(btch, end=" ")
-                print("Loss: ", epoch_loss)
-                print("-----------------------------------")
                 try:
                     with open(hyper_params["training"]["logsFilePath"], "at") as file:
                         now = datetime.now()
