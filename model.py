@@ -118,20 +118,15 @@ def load_dataframe(
 ):
     try:
         sorted_dataframe = pd.read_csv(merged_csv)
-        print("Loaded combined dataframe from memory!")
+        print("Loaded dataframe from memory!")
     except:
-        train_dataframe = modify_dataframe(train_csv, modified_train_csv)
         if use_dev:
-            print("Loading Dev Set also")
+            print("Loading dev set")
             dev_dataframe = modify_dataframe(dev_csv, modified_dev_csv)
-
-            merged_dataframe = pd.concat([train_dataframe, dev_dataframe]).reset_index(
-                drop=True
-            )
-
-            sorted_dataframe = sort_dataframe(merged_dataframe)
+            sorted_dataframe = sort_dataframe(dev_dataframe)
         else:
-            print("Dev Set NOT included")
+            print("Loading train set")
+            train_dataframe = modify_dataframe(train_csv, modified_train_csv)
             sorted_dataframe = sorted_dataframe(train_dataframe)
         sorted_dataframe.to_csv(merged_csv, index=False)
     return sorted_dataframe

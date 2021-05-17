@@ -196,10 +196,18 @@ def main():
         device = torch.device("gpu")
 
     nlp = spacy.load("de_core_news_lg")
-    dataframe = modify_dataframe(
-        original_filename=hyper_params["csv"]["testDataframePath"],
-        updated_filename=hyper_params["csv"]["modifiedTestDataframePath"],
-    )
+    if hyper_params["evaluation"]["use_dev"]:
+        print("Using dev set for evaluating model!")
+        dataframe = modify_dataframe(
+            original_filename=hyper_params["csv"]["devDataframePath"],
+            updated_filename=hyper_params["csv"]["modifiedDevDataframePath"],
+        )
+    else:
+        print("Using test set for evaluating model!")
+        dataframe = modify_dataframe(
+            original_filename=hyper_params["csv"]["testDataframePath"],
+            updated_filename=hyper_params["csv"]["modifiedTestDataframePath"],
+        )
 
     word_dict = load_dictionary(hyper_params["pickle"]["vocabDictionaryPath"])
 
