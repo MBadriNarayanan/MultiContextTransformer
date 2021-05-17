@@ -94,7 +94,7 @@ def modify_dataframe(original_filename: str, updated_filename: str):
 
 
 def sort_dataframe(dataframe: pd.DataFrame):
-    print('Sorting dataframe !')
+    print("Sorting dataframe !")
     seq_lens = []
     span8_path = "Span8/span=8_stride=2/"
     for i in tqdm(range(len(dataframe))):
@@ -114,19 +114,25 @@ def load_dataframe(
     dev_csv: str,
     modified_dev_csv: str,
     merged_csv: str,
+    use_dev: bool,
 ):
     try:
         sorted_dataframe = pd.read_csv(merged_csv)
         print("Loaded combined dataframe from memory!")
     except:
         train_dataframe = modify_dataframe(train_csv, modified_train_csv)
-        dev_dataframe = modify_dataframe(dev_csv, modified_dev_csv)
+        if use_dev:
+            print("Loading Dev Set also")
+            dev_dataframe = modify_dataframe(dev_csv, modified_dev_csv)
 
-        merged_dataframe = pd.concat([train_dataframe, dev_dataframe]).reset_index(
-            drop=True
-        )
+            merged_dataframe = pd.concat([train_dataframe, dev_dataframe]).reset_index(
+                drop=True
+            )
 
-        sorted_dataframe = sort_dataframe(merged_dataframe)
+            sorted_dataframe = sort_dataframe(merged_dataframe)
+        else:
+            print("Dev Set NOT included")
+            sorted_dataframe = sorted_dataframe(train_dataframe)
         sorted_dataframe.to_csv(merged_csv, index=False)
     return sorted_dataframe
 
@@ -153,18 +159,19 @@ def main():
         dev_csv=hyper_params["csv"]["devDataframePath"],
         modified_dev_csv=hyper_params["csv"]["modifiedDevDataframePath"],
         merged_csv=hyper_params["csv"]["mergedDataframePath"],
+        use_dev=hyper_params["csv"]["include_dev"],
     )
 
     word_dict = load_dictionary(hyper_params["pickle"]["vocabDictionaryPath"])
 
-    if hyper_params["pretrained"] == True:
+    if hyper_params["model"]["pretrained"] == True:
         print("Loading pretrained fasttext vectors!")
         ft = fasttext.load_model("cc.de.300.bin")
-        if hyper_params["embeddingDimensions"] < 300:
-            fasttext.util.reduce_model(ft, hyper_params["embeddingDimensions"])
+        if hyper_params["model"]["embeddingDimensions"] < 300:
+            fasttext.util.reduce_model(ft, hyper_params["model"]["embeddingDimensions"])
 
         embedding_matrix = load_embedding_matrix(
-            hyper_params["embeddingDimensions"],
+            hyper_params["model"]["embeddingDimensions"],
             hyper_params["pickle"]["embeddingFilePath"],
         )
     else:
@@ -174,25 +181,25 @@ def main():
         dataframe=dataframe,
         word_dict=word_dict,
         nlp=nlp,
-        frame_drop_flag=hyper_params["dropping_frames"],
+        frame_drop_flag=hyper_params["training"]["dropping_frames"],
     )
     params = {"batch_size": 1, "shuffle": False, "num_workers": 0}
     train_gen = DataLoader(traindataset, **params)
 
     vocab_size = len(word_dict) + 1
-    dmodel_encoder = hyper_params["dModelEncoder"]
-    dmodel_decoder = hyper_params["dModelDecoder"]
-    nhid_encoder = hyper_params["nhidEncoder"]
-    nhid_decoder = hyper_params["nhidDecoder"]
-    nlayers_encoder = hyper_params["numberEncoderLayers"]
-    nlayers_decoder = hyper_params["numberDecoderLayers"]
-    nhead = hyper_params["numberHeads"]
-    dropout = hyper_params["dropout"]
-    concat_input = hyper_params["concatInput"]
-    concat_output = hyper_params["concatOutput"]
-    activation = hyper_params["activation"]
-    flag_pretrained = hyper_params["pretrained"]
-    flag_Continue = hyper_params["flag_continue"]
+    dmodel_encoder = hyper_params["model"]["dModelEncoder"]
+    dmodel_decoder = hyper_params["model"]["dModelDecoder"]
+    nhid_encoder = hyper_params["model"]["nhidEncoder"]
+    nhid_decoder = hyper_params["model"]["nhidDecoder"]
+    nlayers_encoder = hyper_params["model"]["numberEncoderLayers"]
+    nlayers_decoder = hyper_params["model"]["numberDecoderLayers"]
+    nhead = hyper_params["model"]["numberHeads"]
+    dropout = hyper_params["model"]["dropout"]
+    concat_input = hyper_params["model"]["concatInput"]
+    concat_output = hyper_params["model"]["concatOutput"]
+    activation = hyper_params["model"]["activation"]
+    flag_pretrained = hyper_params["model"]["pretrained"]
+    flag_continue = hyper_params["training"]["flag_continue"]
 
     model = MultiContextTransformer(
         vocab_size=vocab_size,
@@ -213,16 +220,20 @@ def main():
     ).to(device)
 
     criterion = nn.CrossEntropyLoss().cuda()
-    optimizer = torch.optim.SGD(model.parameters(), lr=hyper_params["learningRate"])
+    optimizer = torch.optim.SGD(
+        model.parameters(), lr=hyper_params["training"]["learningRate"]
+    )
 
     model_parameters = filter(lambda p: p.requires_grad, model.parameters())
     params = sum([np.prod(p.size()) for p in model_parameters])
     print("Parameters: ", params)
     print("--------------------------------------------")
 
-    if flag_Continue == True:
+    if flag_continue == True:
         print("Model loaded for further training!")
-        checkpoint = torch.load(hyper_params["checkpointFilePathToBeContinued"])
+        checkpoint = torch.load(
+            hyper_params["training"]["checkpointFilePathToBeContinued"]
+        )
         model.load_state_dict(checkpoint["model_state_dict"])
         optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         epoch = checkpoint["epoch"]
@@ -234,7 +245,10 @@ def main():
 
     model.train()
     for epoch in tqdm(
-        range(hyper_params["start_epoch"], hyper_params["end_epoch"] + 1)
+        range(
+            hyper_params["training"]["start_epoch"],
+            hyper_params["training"]["end_epoch"] + 1,
+        )
     ):
         epoch_loss = 0.0
         btch = 1
@@ -269,7 +283,7 @@ def main():
                 print("Loss: ", epoch_loss)
                 print("-----------------------------------")
                 try:
-                    with open(hyper_params["logsFilePath"], "at") as file:
+                    with open(hyper_params["training"]["logsFilePath"], "at") as file:
                         now = datetime.now()
                         current_time = now.strftime("%H:%M:%S")
                         file.write(
@@ -291,8 +305,9 @@ def main():
                 "optimizer_state_dict": optimizer.state_dict(),
                 "loss": epoch_loss,
             },
-            hyper_params["checkpointFilePath"],
+            hyper_params["training"]["checkpointFilePath"],
         )
+
 
 if __name__ == "__main__":
     main()
