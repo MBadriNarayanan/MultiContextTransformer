@@ -25,7 +25,6 @@ from torch.nn.functional import log_softmax
 from bleu import *
 from rouge import *
 
-
 def load_dictionary(filename: str):
     global nlp
     global dataframe
