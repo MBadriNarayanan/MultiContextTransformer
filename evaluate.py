@@ -22,7 +22,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.init import xavier_uniform_
 from torch.nn.functional import log_softmax
-from bleu_score import *
+from bleu import *
+from rouge import *
 
 
 def load_dictionary(filename: str):
@@ -112,15 +113,8 @@ def get_sentence(word_dict, sentence):
 def model_validation(
     dataset_generator, smoothing: bool, threshold: float, file_path: str, device, word_dict, model
 ):
-    uni_gram = []
-    bi_gram = []
-    tri_gram = []
-    four_gram = []
-
-    uni_gram_above_threshold = []
-    bi_gram_above_threshold = []
-    tri_gram_above_threshold = []
-    four_gram_above_threshold = []
+    gt_list = []
+    pred_list = []
 
     file = open(file_path, "wt")
 
@@ -161,58 +155,25 @@ def model_validation(
         file.write("Ground Truth: " + gt + "\n")
         file.write("Prediction: " + predict + "\n")
         file.write("-----------------------------------\n")
-        bleu_1, _,_,_,_,_ = compute_bleu([[ground_truth]], [prediction], max_order = 1, smooth=smoothing)
-        bleu_2, _,_,_,_,_= compute_bleu([[ground_truth]], [prediction], max_order = 2, smooth=smoothing)
-        bleu_3, _,_,_,_,_ = compute_bleu([[ground_truth]], [prediction], max_order = 3, smooth=smoothing)
-        bleu_4, _,_,_,_,_ = compute_bleu([[ground_truth]], [prediction], max_order = 4, smooth=smoothing)
-        
-        uni_gram.append(bleu_1)
-        bi_gram.append(bleu_2)
-        tri_gram.append(bleu_3)
-        four_gram.append(bleu_4)
-
-        if bleu_1 > threshold:
-            uni_gram_above_threshold.append(bleu_1)
-        if bleu_2 > threshold:
-            bi_gram_above_threshold.append(bleu_2)
-        if bleu_3 > threshold:
-            tri_gram_above_threshold.append(bleu_3)
-        if bleu_4 > threshold:
-            four_gram_above_threshold.append(bleu_4)
-
+        gt_list.append(gt)
+        pred_list.append(predict)
         del inputs, targets, prediction_tensor
         del span8src, span12src, span16src
         del ground_truth, prediction
         del gt, predict   
 
-    file.write("Total Uni Gram: %d \n" % (len(uni_gram)))
-    file.write("Total Bi Gram: %d \n" % (len(bi_gram)))
-    file.write("Total Tri Gram: %d \n" % (len(tri_gram)))
-    file.write("Total Four Gram: %d \n" % (len(four_gram)))
-    file.write(
-        "Total Uni Gram Above %.2f: %d\n" % (threshold, len(uni_gram_above_threshold))
-    )
-    file.write(
-        "Total Bi Gram Above %.2f: %d\n" % (threshold, len(bi_gram_above_threshold))
-    )
-    file.write(
-        "Total Tri Gram Above %.2f: %d\n" % (threshold, len(tri_gram_above_threshold))
-    )
-    file.write(
-        "Total Four Gram Above %.2f: %d\n" % (threshold, len(four_gram_above_threshold))
-    )
-
-    uni_gram = np.array(uni_gram)
-    file.write("BLEU 1: %.3f\n" % (np.average(uni_gram)))
-    
-    bi_gram = np.array(bi_gram)
-    file.write("BLEU 2: %.3f\n" % (np.average(bi_gram)))
-    
-    tri_gram = np.array(tri_gram)
-    file.write("BLEU 3: %.3f\n" % (np.average(tri_gram)))
-
-    four_gram = np.array(four_gram)
-    file.write("BLEU 4: %.3f\n" % (np.average(four_gram)))
+    bleu = compute_cvpr_bleu(pred_list, gt_list)
+    rouge_score = rouge(pred_list, gt_list)
+    rouge_l = rouge_score["rouge_l/f_score"]
+    rouge_l = round(rouge_l * 100, 2)
+    file.write("BLEU 1: %f\n" % (bleu[0]))
+    file.write("BLEU 2: %f\n" % (bleu[1]))
+    file.write("BLEU 3: %f\n" % (bleu[2]))
+    file.write("BLEU 4: %f\n" % (bleu[3]))
+    file.write("ROUGE L: %f \n" % (rouge_l))
+    del gt_list, pred_list
+    del bleu, rouge_score
+    del rouge_l
     
 def main():
     if len(sys.argv) != 2:

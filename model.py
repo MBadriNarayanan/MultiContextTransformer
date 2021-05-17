@@ -222,7 +222,7 @@ def main():
 
     if flag_Continue == True:
         print("Model loaded for further training!")
-        checkpoint = torch.load(hyper_params["checkpointFilePath"])
+        checkpoint = torch.load(hyper_params["checkpointFilePathToBeContinued"])
         model.load_state_dict(checkpoint["model_state_dict"])
         optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         epoch = checkpoint["epoch"]

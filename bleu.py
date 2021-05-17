@@ -105,3 +105,23 @@ def compute_bleu(reference_corpus, translation_corpus, max_order=4,
     bleu = geo_mean * bp
 
     return bleu, precisions, bp, ratio, translation_length, reference_length
+
+def compute_cvpr_bleu(hyps, refs, max_order=4):
+    """Assume tokens in hypothesis and references are seperated with spaces.
+    """
+    tokenized_hyps = []
+    tokenized_refs = []
+
+    for h in hyps:
+        tokenized_hyps.append(h.split())
+
+    for r in refs:
+        tokenized_refs.append([r.split()])
+
+    bleu_all_orders = []
+
+    for i in list(range(1, max_order+1)):
+        bleu, precisions, bp, ratio, translation_length, reference_length = compute_bleu(tokenized_refs, tokenized_hyps, max_order=i)
+        bleu_all_orders.append(round(bleu * 100, 2))
+
+    return bleu_all_orders
