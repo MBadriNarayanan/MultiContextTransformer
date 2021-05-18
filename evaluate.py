@@ -153,7 +153,7 @@ def model_validation(
         gt = " ".join(ground_truth)
         prediction = get_sentence(word_dict, prediction_tensor)
         predict = " ".join(prediction)
-        file.write("Sentence %d out of 642\n" % (i + 1))
+        file.write("Sentence %d \n" % (i + 1))
         file.write("Ground Truth: " + gt + "\n")
         file.write("Prediction: " + predict + "\n")
         file.write("-----------------------------------\n")
