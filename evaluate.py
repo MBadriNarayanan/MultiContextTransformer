@@ -3,14 +3,13 @@ import pandas as pd
 import numpy as np
 import pickle
 from tqdm import tqdm
-import fasttext
-import fasttext.util
-import nltk
-import spacy
 import sys
 
-nltk.download("punkt")
-nltk.download("stopwords")
+import nltk
+import spacy
+from nltk import word_tokenize
+nltk.download('punkt')
+nltk.download('stopwords')
 
 from slt_data import *
 from MultiContextTransformer import *
@@ -70,13 +69,12 @@ def load_embedding_matrix(embed_dim: int, filename: str):
 
 
 def modify_dataframe(original_filename: str, updated_filename: str):
-    dataframe = pd.read_csv(original_filename, sep="|")
-
     try:
         dataframe = pd.read_csv(updated_filename)
         print("Updated dataframe loaded from memory!")
     except:
         print("Updating dataframe!")
+        dataframe = pd.read_csv(original_filename, sep="|")
         gloss = []
         translation = []
         for i in range(len(dataframe)):
@@ -193,7 +191,7 @@ def main():
         device = torch.device("cuda")
         print("GPU")
     else:
-        device = torch.device("cpu")
+        device = torch.device("gpu")
 
     nlp = spacy.load("de_core_news_lg")
     if hyper_params["evaluation"]["use_dev"]:
