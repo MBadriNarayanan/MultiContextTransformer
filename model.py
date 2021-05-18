@@ -5,7 +5,7 @@ import pickle
 from tqdm import tqdm
 from datetime import datetime
 import sys
-
+import fasttext
 import nltk
 import spacy
 from nltk import word_tokenize
@@ -48,12 +48,14 @@ def load_dictionary(filename: str):
 
 def load_embedding_matrix(embed_dim: int, filename: str):
     global word_dict
-    global ft
     try:
         embedding_matrix = np.load(filename)
         print("Embedding Matrix loaded from memory!")
     except:
         print("Creating Embedding Matrix!")
+        ft = fasttext.load_model("cc.de.300.bin")
+        if hyper_params["model"]["embeddingDimensions"] < 300:
+            fasttext.util.reduce_model(ft, hyper_params["model"]["embeddingDimensions"])
         embed_dim = embed_dim
         max_words = len(word_dict) + 1
         embedding_matrix = np.zeros((max_words, embed_dim))
@@ -158,16 +160,13 @@ def main():
     word_dict = load_dictionary(hyper_params["pickle"]["vocabDictionaryPath"])
 
     if hyper_params["model"]["pretrained"] == True:
-        print("Loading pretrained fasttext vectors!")
-        ft = fasttext.load_model("cc.de.300.bin")
-        if hyper_params["model"]["embeddingDimensions"] < 300:
-            fasttext.util.reduce_model(ft, hyper_params["model"]["embeddingDimensions"])
-
+        print("Loading Embedding Matrix!")
         embedding_matrix = load_embedding_matrix(
             hyper_params["model"]["embeddingDimensions"],
             hyper_params["pickle"]["embeddingFilePath"],
         )
     else:
+        print("Embedding Matrix not pretrained!")
         embedding_matrix = None
 
     traindataset = SLT_Dataset(
