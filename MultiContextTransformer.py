@@ -16,7 +16,8 @@ class MultiContextTransformer(Module):
         nlayers_decoder,
         concat_input,
         concat_output,
-        nhead,
+        nhead_encoder,
+        nhead_decoder,
         dropout,
         activation,
         pretrained_embedding,
@@ -26,14 +27,14 @@ class MultiContextTransformer(Module):
         super(MultiContextTransformer, self).__init__()
         encoderlayers = TransformerEncoderLayer(
             dmodel_encoder,
-            nhead,
+            nhead_encoder,
             dim_feedforward=nhid_encoder,
             dropout=dropout,
             activation=activation,
         )
         decoderlayers = TransformerDecoderLayer(
             dmodel_decoder,
-            nhead,
+            nhead_decoder,
             dim_feedforward=nhid_decoder,
             dropout=dropout,
             activation=activation,

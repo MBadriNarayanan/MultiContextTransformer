@@ -185,7 +185,8 @@ def main():
     nhid_decoder = hyper_params["model"]["nhidDecoder"]
     nlayers_encoder = hyper_params["model"]["numberEncoderLayers"]
     nlayers_decoder = hyper_params["model"]["numberDecoderLayers"]
-    nhead = hyper_params["model"]["numberHeads"]
+    nhead_encoder = hyper_params["model"]["numberHeadsEncoder"]
+    nhead_decoder = hyper_params["model"]["numberHeadsDecoder"]
     dropout = hyper_params["model"]["dropout"]
     concat_input = hyper_params["model"]["concatInput"]
     concat_output = hyper_params["model"]["concatOutput"]
@@ -201,7 +202,8 @@ def main():
         nhid_decoder=nhid_decoder,
         nlayers_encoder=nlayers_encoder,
         nlayers_decoder=nlayers_decoder,
-        nhead=nhead,
+        nhead_encoder=nhead_encoder,
+        nhead_decoder=nhead_decoder,
         dropout=dropout,
         activation=activation,
         embedding_matrix=embedding_matrix,
