@@ -188,12 +188,12 @@ def main():
     nhead_encoder = hyper_params["model"]["numberHeadsEncoder"]
     nhead_decoder = hyper_params["model"]["numberHeadsDecoder"]
     dropout = hyper_params["model"]["dropout"]
-    concat_input = hyper_params["model"]["concatInput"]
-    concat_output = hyper_params["model"]["concatOutput"]
     activation = hyper_params["model"]["activation"]
     flag_pretrained = hyper_params["model"]["pretrained"]
     flag_continue = hyper_params["training"]["flag_continue"]
-
+    concat_input = 3 * dmodel_encoder
+    concat_output = dmodel_decoder
+    
     model = MultiContextTransformer(
         vocab_size=vocab_size,
         dmodel_encoder=dmodel_encoder,
