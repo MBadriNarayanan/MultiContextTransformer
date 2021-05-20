@@ -26,6 +26,7 @@
         "activation": "",
         "dropout": 0.0,
         "embeddingDimensions": 0
+        
     },
     "training": {
         "dropping_frames": 0,
