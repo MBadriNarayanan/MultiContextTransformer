@@ -23,8 +23,6 @@
         "numberHeadsDecoder": 0,
         "nhidEncoder": 0,
         "nhidDecoder": 0,
-        "concatInput": 0,
-        "concatOutput": 0,
         "activation": "",
         "dropout": 0.0,
         "embeddingDimensions": 0
