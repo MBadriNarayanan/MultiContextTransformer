@@ -116,6 +116,7 @@ def model_validation(
     device,
     word_dict,
     model,
+    length
 ):
     gt_list = []
     pred_list = []
@@ -155,7 +156,7 @@ def model_validation(
         gt = " ".join(ground_truth)
         prediction = get_sentence(word_dict, prediction_tensor)
         predict = " ".join(prediction)
-        file.write("Sentence %d \n" % (i + 1))
+        file.write("Sentence %d out of %d \n" % (i + 1, length))
         file.write("Ground Truth: " + gt + "\n")
         file.write("Prediction: " + predict + "\n")
         file.write("-----------------------------------\n")
@@ -245,7 +246,7 @@ def main():
     flag_continue = hyper_params["training"]["flag_continue"]
     concat_input = 3 * dmodel_encoder
     concat_output = dmodel_decoder
-    
+
     model = MultiContextTransformer(
         vocab_size=vocab_size,
         dmodel_encoder=dmodel_encoder,
@@ -281,6 +282,7 @@ def main():
         device=device,
         word_dict=word_dict,
         model=model,
+        length=len(dataframe)
     )
 
 

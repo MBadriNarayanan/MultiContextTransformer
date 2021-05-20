@@ -193,7 +193,11 @@ def main():
     flag_continue = hyper_params["training"]["flag_continue"]
     concat_input = 3 * dmodel_encoder
     concat_output = dmodel_decoder
-    
+
+    if hyper_params["csv"]["include_dev"] :
+        print_flag = 100
+    else :
+        print_flag = 1000
     model = MultiContextTransformer(
         vocab_size=vocab_size,
         dmodel_encoder=dmodel_encoder,
@@ -272,16 +276,13 @@ def main():
             del span8src, span12src, span16src
             del yhat, targets1, zeros
             del modified_targets
-            if btch % 1000 == 0:
-                print(btch, end=" ")
-                print("Loss: ", epoch_loss)
-                print("-----------------------------------")
+            if btch % print_flag == 0:
                 try:
                     with open(hyper_params["training"]["logsFilePath"], "at") as file:
                         now = datetime.now()
                         current_time = now.strftime("%H:%M:%S")
                         file.write(
-                            "Epoch: {}, Batch: {}, Loss: {}, Time: {}\n".format(
+                            "Epoch: {}, Batch Loss: {}, Epoch Loss: {}, Time: {}\n".format(
                                 epoch, loss.item(), epoch_loss, current_time
                             )
                         )
