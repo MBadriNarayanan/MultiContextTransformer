@@ -82,8 +82,6 @@ class Transformer(Module):
                 decoder_layer, num_decoder_layers, decoder_norm
             )
 
-        #         self.init_weights()
-
         self.d_model = d_model
         self.nhead = nhead
 
