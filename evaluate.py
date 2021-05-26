@@ -5,6 +5,7 @@ import pickle
 from tqdm import tqdm
 import sys
 import fasttext
+import fasttext.util
 import nltk
 import spacy
 from nltk import word_tokenize
@@ -25,9 +26,7 @@ from bleu import *
 from rouge import *
 
 
-def load_dictionary(filename: str):
-    global nlp
-    global dataframe
+def load_dictionary(nlp, dataframe, filename: str):
     try:
         with open(filename, "rb") as fin:
             word_dict = pickle.load(fin)
@@ -48,16 +47,15 @@ def load_dictionary(filename: str):
     return word_dict
 
 
-def load_embedding_matrix(embed_dim: int, filename: str):
-    global word_dict
+def load_embedding_matrix(word_dict, embed_dim: int, filename: str):
     try:
         embedding_matrix = np.load(filename)
         print("Embedding Matrix loaded from memory!")
     except:
         print("Creating Embedding Matrix!")
         ft = fasttext.load_model("cc.de.300.bin")
-        if hyper_params["model"]["embeddingDimensions"] < 300:
-            fasttext.util.reduce_model(ft, hyper_params["model"]["embeddingDimensions"])
+        if embed_dim < 300:
+            fasttext.util.reduce_model(ft, embed_dim)
         embed_dim = embed_dim
         max_words = len(word_dict) + 1
         embedding_matrix = np.zeros((max_words, embed_dim))
@@ -210,11 +208,12 @@ def main():
             updated_filename=hyper_params["csv"]["modifiedTestDataframePath"],
         )
 
-    word_dict = load_dictionary(hyper_params["pickle"]["vocabDictionaryPath"])
+    word_dict = load_dictionary(nlp, dataframe, hyper_params["pickle"]["vocabDictionaryPath"])
 
     if hyper_params["model"]["pretrained"] == True:
         print("Loading Embedding Matrix!")
         embedding_matrix = load_embedding_matrix(
+            word_dict,
             hyper_params["model"]["embeddingDimensions"],
             hyper_params["pickle"]["embeddingFilePath"],
         )
