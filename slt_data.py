@@ -4,13 +4,13 @@ from torch.nn.utils.rnn import pad_sequence
 
 
 class SLT_Dataset(Dataset):
-    def __init__(self, nlp, dataframe, word_dict, frame_drop_flag):
+    def __init__(self, nlp, dataframe, word_dict, vector_drop_flag):
         self.dataframe = dataframe
         self.word_dict = word_dict
         self.span8 = "Span8/span=8_stride=2/"
         self.span12 = "Span12/span=12_stride=2/"
         self.span16 = "Span16/span=16_stride=2/"
-        self.frame_drop_flag = frame_drop_flag
+        self.vector_drop_flag = vector_drop_flag
         self.nlp = nlp
 
     def __len__(self):
@@ -25,7 +25,7 @@ class SLT_Dataset(Dataset):
         token_tensor = torch.FloatTensor(l)
         return token_tensor
 
-    def frame_drop(self, span_tensor, idx_drop):
+    def vector_drop(self, span_tensor, idx_drop):
         idx = []
         span_tensor = span_tensor[:, :-2, :]
         if span_tensor.shape[1] > 50:
@@ -46,13 +46,8 @@ class SLT_Dataset(Dataset):
         span12_tensor = pad_sequence(torch.load(self.span12 + filename + ".pt"))
         span16_tensor = pad_sequence(torch.load(self.span16 + filename + ".pt"))
 
-        if self.frame_drop_flag != 0:
-            if self.frame_drop_flag == 1:
-                span8_tensor = self.frame_drop(span8_tensor, 0)
-                span12_tensor = self.frame_drop(span12_tensor, 0)
-                span16_tensor = self.frame_drop(span16_tensor, 0)
-            else:
-                span8_tensor = self.frame_drop(span8_tensor, 1)
-                span12_tensor = self.frame_drop(span12_tensor, 0)
-                span16_tensor = self.frame_drop(span16_tensor, 3)
+        if self.vector_drop_flag == 1:
+            span8_tensor = self.vector_drop(span8_tensor, 0)
+            span12_tensor = self.vector_drop(span12_tensor, 0)
+            span16_tensor = self.vector_drop(span16_tensor, 0)
         return ((span8_tensor, span12_tensor, span16_tensor), translation_tokens)

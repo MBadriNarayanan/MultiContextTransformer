@@ -172,7 +172,7 @@ def main():
         dataframe=dataframe,
         word_dict=word_dict,
         nlp=nlp,
-        frame_drop_flag=hyper_params["training"]["dropping_frames"],
+        vector_drop_flag=hyper_params["training"]["dropping_vectors"],
     )
     params = {"batch_size": 1, "shuffle": False, "num_workers": 0}
     train_gen = DataLoader(traindataset, **params)
