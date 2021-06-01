@@ -193,6 +193,7 @@ def main():
         print("GPU")
     else:
         device = torch.device("cpu")
+        print("CPU")
 
     nlp = spacy.load("de_core_news_lg")
     if hyper_params["evaluation"]["use_dev"]:
