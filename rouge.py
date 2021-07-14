@@ -20,18 +20,18 @@ import numpy as np
 def _get_ngrams(n, text):
     """Calculates n-grams.
 
-  Args:
-    n: which n-grams to calculate
-    text: An array of tokens
+    Args:
+      n: which n-grams to calculate
+      text: An array of tokens
 
-  Returns:
-    A set of n-grams
-  """
+    Returns:
+      A set of n-grams
+    """
     ngram_set = set()
     text_length = len(text)
     max_index_ngram_start = text_length - n
     for i in range(max_index_ngram_start + 1):
-        ngram_set.add(tuple(text[i:i + n]))
+        ngram_set.add(tuple(text[i : i + n]))
     return ngram_set
 
 
@@ -41,8 +41,7 @@ def _split_into_words(sentences):
 
 
 def _get_word_ngrams(n, sentences):
-    """Calculates word n-grams for multiple sentences.
-  """
+    """Calculates word n-grams for multiple sentences."""
     assert len(sentences) > 0
     assert n > 0
 
@@ -52,17 +51,17 @@ def _get_word_ngrams(n, sentences):
 
 def _len_lcs(x, y):
     """
-  Returns the length of the Longest Common Subsequence between sequences x
-  and y.
-  Source: http://www.algorithmist.com/index.php/Longest_Common_Subsequence
+    Returns the length of the Longest Common Subsequence between sequences x
+    and y.
+    Source: http://www.algorithmist.com/index.php/Longest_Common_Subsequence
 
-  Args:
-    x: sequence of words
-    y: sequence of words
+    Args:
+      x: sequence of words
+      y: sequence of words
 
-  Returns
-    integer: Length of LCS between x and y
-  """
+    Returns
+      integer: Length of LCS between x and y
+    """
     table = _lcs(x, y)
     n, m = len(x), len(y)
     return table[n, m]
@@ -70,18 +69,18 @@ def _len_lcs(x, y):
 
 def _lcs(x, y):
     """
-  Computes the length of the longest common subsequence (lcs) between two
-  strings. The implementation below uses a DP programming algorithm and runs
-  in O(nm) time where n = len(x) and m = len(y).
-  Source: http://www.algorithmist.com/index.php/Longest_Common_Subsequence
+    Computes the length of the longest common subsequence (lcs) between two
+    strings. The implementation below uses a DP programming algorithm and runs
+    in O(nm) time where n = len(x) and m = len(y).
+    Source: http://www.algorithmist.com/index.php/Longest_Common_Subsequence
 
-  Args:
-    x: collection of words
-    y: collection of words
+    Args:
+      x: collection of words
+      y: collection of words
 
-  Returns:
-    Table of dictionary of coord and len lcs
-  """
+    Returns:
+      Table of dictionary of coord and len lcs
+    """
     n, m = len(x), len(y)
     table = dict()
     for i in range(n + 1):
@@ -97,16 +96,16 @@ def _lcs(x, y):
 
 def _recon_lcs(x, y):
     """
-  Returns the Longest Subsequence between x and y.
-  Source: http://www.algorithmist.com/index.php/Longest_Common_Subsequence
+    Returns the Longest Subsequence between x and y.
+    Source: http://www.algorithmist.com/index.php/Longest_Common_Subsequence
 
-  Args:
-    x: sequence of words
-    y: sequence of words
+    Args:
+      x: sequence of words
+      y: sequence of words
 
-  Returns:
-    sequence: LCS of x and y
-  """
+    Returns:
+      sequence: LCS of x and y
+    """
     i, j = len(x), len(y)
     table = _lcs(x, y)
 
@@ -127,21 +126,21 @@ def _recon_lcs(x, y):
 
 def rouge_n(evaluated_sentences, reference_sentences, n=2):
     """
-  Computes ROUGE-N of two text collections of sentences.
-  Source: http://research.microsoft.com/en-us/um/people/cyl/download/
-  papers/rouge-working-note-v1.3.1.pdf
+    Computes ROUGE-N of two text collections of sentences.
+    Source: http://research.microsoft.com/en-us/um/people/cyl/download/
+    papers/rouge-working-note-v1.3.1.pdf
 
-  Args:
-    evaluated_sentences: The sentences that have been picked by the summarizer
-    reference_sentences: The sentences from the referene set
-    n: Size of ngram.  Defaults to 2.
+    Args:
+      evaluated_sentences: The sentences that have been picked by the summarizer
+      reference_sentences: The sentences from the referene set
+      n: Size of ngram.  Defaults to 2.
 
-  Returns:
-    A tuple (f1, precision, recall) for ROUGE-N
+    Returns:
+      A tuple (f1, precision, recall) for ROUGE-N
 
-  Raises:
-    ValueError: raises exception if a param has len <= 0
-  """
+    Raises:
+      ValueError: raises exception if a param has len <= 0
+    """
     if len(evaluated_sentences) <= 0 or len(reference_sentences) <= 0:
         raise ValueError("Collections must contain at least 1 sentence.")
 
@@ -173,18 +172,18 @@ def rouge_n(evaluated_sentences, reference_sentences, n=2):
 
 def _f_p_r_lcs(llcs, m, n):
     """
-  Computes the LCS-based F-measure score
-  Source: http://research.microsoft.com/en-us/um/people/cyl/download/papers/
-  rouge-working-note-v1.3.1.pdf
+    Computes the LCS-based F-measure score
+    Source: http://research.microsoft.com/en-us/um/people/cyl/download/papers/
+    rouge-working-note-v1.3.1.pdf
 
-  Args:
-    llcs: Length of LCS
-    m: number of words in reference summary
-    n: number of words in candidate summary
+    Args:
+      llcs: Length of LCS
+      m: number of words in reference summary
+      n: number of words in candidate summary
 
-  Returns:
-    Float. LCS-based F-measure score
-  """
+    Returns:
+      Float. LCS-based F-measure score
+    """
     r_lcs = llcs / m
     p_lcs = llcs / n
     beta = p_lcs / (r_lcs + 1e-12)
@@ -196,31 +195,31 @@ def _f_p_r_lcs(llcs, m, n):
 
 def rouge_l_sentence_level(evaluated_sentences, reference_sentences):
     """
-  Computes ROUGE-L (sentence level) of two text collections of sentences.
-  http://research.microsoft.com/en-us/um/people/cyl/download/papers/
-  rouge-working-note-v1.3.1.pdf
+    Computes ROUGE-L (sentence level) of two text collections of sentences.
+    http://research.microsoft.com/en-us/um/people/cyl/download/papers/
+    rouge-working-note-v1.3.1.pdf
 
-  Calculated according to:
-  R_lcs = LCS(X,Y)/m
-  P_lcs = LCS(X,Y)/n
-  F_lcs = ((1 + beta^2)*R_lcs*P_lcs) / (R_lcs + (beta^2) * P_lcs)
+    Calculated according to:
+    R_lcs = LCS(X,Y)/m
+    P_lcs = LCS(X,Y)/n
+    F_lcs = ((1 + beta^2)*R_lcs*P_lcs) / (R_lcs + (beta^2) * P_lcs)
 
-  where:
-  X = reference summary
-  Y = Candidate summary
-  m = length of reference summary
-  n = length of candidate summary
+    where:
+    X = reference summary
+    Y = Candidate summary
+    m = length of reference summary
+    n = length of candidate summary
 
-  Args:
-    evaluated_sentences: The sentences that have been picked by the summarizer
-    reference_sentences: The sentences from the referene set
+    Args:
+      evaluated_sentences: The sentences that have been picked by the summarizer
+      reference_sentences: The sentences from the referene set
 
-  Returns:
-    A float: F_lcs
+    Returns:
+      A float: F_lcs
 
-  Raises:
-    ValueError: raises exception if a param has len <= 0
-  """
+    Raises:
+      ValueError: raises exception if a param has len <= 0
+    """
     if len(evaluated_sentences) <= 0 or len(reference_sentences) <= 0:
         raise ValueError("Collections must contain at least 1 sentence.")
     reference_words = _split_into_words(reference_sentences)
@@ -233,24 +232,24 @@ def rouge_l_sentence_level(evaluated_sentences, reference_sentences):
 
 def _union_lcs(evaluated_sentences, reference_sentence):
     """
-  Returns LCS_u(r_i, C) which is the LCS score of the union longest common
-  subsequence between reference sentence ri and candidate summary C. For example
-  if r_i= w1 w2 w3 w4 w5, and C contains two sentences: c1 = w1 w2 w6 w7 w8 and
-  c2 = w1 w3 w8 w9 w5, then the longest common subsequence of r_i and c1 is
-  "w1 w2" and the longest common subsequence of r_i and c2 is "w1 w3 w5". The
-  union longest common subsequence of r_i, c1, and c2 is "w1 w2 w3 w5" and
-  LCS_u(r_i, C) = 4/5.
+    Returns LCS_u(r_i, C) which is the LCS score of the union longest common
+    subsequence between reference sentence ri and candidate summary C. For example
+    if r_i= w1 w2 w3 w4 w5, and C contains two sentences: c1 = w1 w2 w6 w7 w8 and
+    c2 = w1 w3 w8 w9 w5, then the longest common subsequence of r_i and c1 is
+    "w1 w2" and the longest common subsequence of r_i and c2 is "w1 w3 w5". The
+    union longest common subsequence of r_i, c1, and c2 is "w1 w2 w3 w5" and
+    LCS_u(r_i, C) = 4/5.
 
-  Args:
-    evaluated_sentences: The sentences that have been picked by the summarizer
-    reference_sentence: One of the sentences in the reference summaries
+    Args:
+      evaluated_sentences: The sentences that have been picked by the summarizer
+      reference_sentence: One of the sentences in the reference summaries
 
-  Returns:
-    float: LCS_u(r_i, C)
+    Returns:
+      float: LCS_u(r_i, C)
 
-  ValueError:
-    Raises exception if a param has len <= 0
-  """
+    ValueError:
+      Raises exception if a param has len <= 0
+    """
     if len(evaluated_sentences) <= 0:
         raise ValueError("Collections must contain at least 1 sentence.")
 
@@ -270,32 +269,32 @@ def _union_lcs(evaluated_sentences, reference_sentence):
 
 def rouge_l_summary_level(evaluated_sentences, reference_sentences):
     """
-  Computes ROUGE-L (summary level) of two text collections of sentences.
-  http://research.microsoft.com/en-us/um/people/cyl/download/papers/
-  rouge-working-note-v1.3.1.pdf
+    Computes ROUGE-L (summary level) of two text collections of sentences.
+    http://research.microsoft.com/en-us/um/people/cyl/download/papers/
+    rouge-working-note-v1.3.1.pdf
 
-  Calculated according to:
-  R_lcs = SUM(1, u)[LCS<union>(r_i,C)]/m
-  P_lcs = SUM(1, u)[LCS<union>(r_i,C)]/n
-  F_lcs = ((1 + beta^2)*R_lcs*P_lcs) / (R_lcs + (beta^2) * P_lcs)
+    Calculated according to:
+    R_lcs = SUM(1, u)[LCS<union>(r_i,C)]/m
+    P_lcs = SUM(1, u)[LCS<union>(r_i,C)]/n
+    F_lcs = ((1 + beta^2)*R_lcs*P_lcs) / (R_lcs + (beta^2) * P_lcs)
 
-  where:
-  SUM(i,u) = SUM from i through u
-  u = number of sentences in reference summary
-  C = Candidate summary made up of v sentences
-  m = number of words in reference summary
-  n = number of words in candidate summary
+    where:
+    SUM(i,u) = SUM from i through u
+    u = number of sentences in reference summary
+    C = Candidate summary made up of v sentences
+    m = number of words in reference summary
+    n = number of words in candidate summary
 
-  Args:
-    evaluated_sentences: The sentences that have been picked by the summarizer
-    reference_sentence: One of the sentences in the reference summaries
+    Args:
+      evaluated_sentences: The sentences that have been picked by the summarizer
+      reference_sentence: One of the sentences in the reference summaries
 
-  Returns:
-    A float: F_lcs
+    Returns:
+      A float: F_lcs
 
-  Raises:
-    ValueError: raises exception if a param has len <= 0
-  """
+    Raises:
+      ValueError: raises exception if a param has len <= 0
+    """
     if len(evaluated_sentences) <= 0 or len(reference_sentences) <= 0:
         raise ValueError("Collections must contain at least 1 sentence.")
 
@@ -307,14 +306,13 @@ def rouge_l_summary_level(evaluated_sentences, reference_sentences):
 
     union_lcs_sum_across_all_references = 0
     for ref_s in reference_sentences:
-        union_lcs_sum_across_all_references += _union_lcs(evaluated_sentences,
-                                                          ref_s)
+        union_lcs_sum_across_all_references += _union_lcs(evaluated_sentences, ref_s)
     return _f_p_r_lcs(union_lcs_sum_across_all_references, m, n)
 
 
 def rouge(hypotheses, references):
     """Calculates average rouge scores for a list of hypotheses and
-  references"""
+    references"""
 
     # Filter out hyps that are of 0 length
     # hyps_and_refs = zip(hypotheses, references)
@@ -322,21 +320,16 @@ def rouge(hypotheses, references):
     # hypotheses, references = zip(*hyps_and_refs)
 
     # Calculate ROUGE-1 F1, precision, recall scores
-    rouge_1 = [
-        rouge_n([hyp], [ref], 1) for hyp, ref in zip(hypotheses, references)
-    ]
+    rouge_1 = [rouge_n([hyp], [ref], 1) for hyp, ref in zip(hypotheses, references)]
     rouge_1_f, rouge_1_p, rouge_1_r = map(np.mean, zip(*rouge_1))
 
     # Calculate ROUGE-2 F1, precision, recall scores
-    rouge_2 = [
-        rouge_n([hyp], [ref], 2) for hyp, ref in zip(hypotheses, references)
-    ]
+    rouge_2 = [rouge_n([hyp], [ref], 2) for hyp, ref in zip(hypotheses, references)]
     rouge_2_f, rouge_2_p, rouge_2_r = map(np.mean, zip(*rouge_2))
 
     # Calculate ROUGE-L F1, precision, recall scores
     rouge_l = [
-        rouge_l_sentence_level([hyp], [ref])
-        for hyp, ref in zip(hypotheses, references)
+        rouge_l_sentence_level([hyp], [ref]) for hyp, ref in zip(hypotheses, references)
     ]
     rouge_l_f, rouge_l_p, rouge_l_r = map(np.mean, zip(*rouge_l))
 

@@ -9,8 +9,9 @@ import fasttext.util
 import nltk
 import spacy
 from nltk import word_tokenize
-nltk.download('punkt')
-nltk.download('stopwords')
+
+nltk.download("punkt")
+nltk.download("stopwords")
 
 from slt_data import *
 from MultiContextTransformer import *
@@ -109,12 +110,7 @@ def get_sentence(word_dict, sentence):
 
 
 def model_validation(
-    dataset_generator,
-    file_path: str,
-    device,
-    word_dict,
-    model,
-    length
+    dataset_generator, file_path: str, device, word_dict, model, length
 ):
     gt_list = []
     pred_list = []
@@ -209,7 +205,9 @@ def main():
             updated_filename=hyper_params["csv"]["modifiedTestDataframePath"],
         )
 
-    word_dict = load_dictionary(nlp, dataframe, hyper_params["pickle"]["vocabDictionaryPath"])
+    word_dict = load_dictionary(
+        nlp, dataframe, hyper_params["pickle"]["vocabDictionaryPath"]
+    )
 
     if hyper_params["model"]["pretrained"] == True:
         print("Loading Embedding Matrix!")
@@ -282,7 +280,7 @@ def main():
         device=device,
         word_dict=word_dict,
         model=model,
-        length=len(dataframe)
+        length=len(dataframe),
     )
 
 
