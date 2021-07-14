@@ -45,12 +45,12 @@ class MultiContextTransformer(Module):
         self.span16encoder = TransformerEncoder(encoderlayers, nlayers_encoder)
 
         if pretrained_embedding == True:
-            print('Loaded pretrained Embedding Matrix in model!')
+            print("Loaded pretrained Embedding Matrix in model!")
             self.decoder_embedding = Embedding.from_pretrained(
                 torch.FloatTensor(embedding_matrix), freeze=False
             )
         else:
-            print('Embedding Layer not pretrained!')
+            print("Embedding Layer not pretrained!")
             self.decoder_embedding = Embedding(vocab_size, dmodel_decoder)
         self.decoder = TransformerDecoder(decoderlayers, nlayers_decoder)
         self.concatlinear = Linear(concat_input, concat_output)

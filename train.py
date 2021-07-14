@@ -10,8 +10,9 @@ import fasttext.util
 import nltk
 import spacy
 from nltk import word_tokenize
-nltk.download('punkt')
-nltk.download('stopwords')
+
+nltk.download("punkt")
+nltk.download("stopwords")
 
 from slt_data import *
 from MultiContextTransformer import *
@@ -156,7 +157,9 @@ def main():
         use_dev=hyper_params["csv"]["include_dev"],
     )
 
-    word_dict = load_dictionary(nlp, dataframe, hyper_params["pickle"]["vocabDictionaryPath"])
+    word_dict = load_dictionary(
+        nlp, dataframe, hyper_params["pickle"]["vocabDictionaryPath"]
+    )
 
     if hyper_params["model"]["pretrained"] == True:
         print("Loading Embedding Matrix!")
@@ -194,9 +197,9 @@ def main():
     concat_input = 3 * dmodel_encoder
     concat_output = dmodel_decoder
 
-    if hyper_params["csv"]["include_dev"] :
+    if hyper_params["csv"]["include_dev"]:
         print_flag = 100
-    else :
+    else:
         print_flag = 1000
     model = MultiContextTransformer(
         vocab_size=vocab_size,
