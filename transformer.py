@@ -455,10 +455,21 @@ class TransformerDecoderLayer(Module):
 
 
 def _get_clones(module, N):
+    r"""Helper function to return the necessary activation for the model
+
+    Args:
+        module: Module to be replicated
+        N: Number of times the module is to be replicated
+    """
     return ModuleList([copy.deepcopy(module) for i in range(N)])
 
 
 def _get_activation_fn(activation):
+    r"""Helper function to return the necessary activation for the model
+
+    Args:
+        activation: name of activation function
+    """
     if activation == "relu":
         return F.relu
     elif activation == "elu":
@@ -466,10 +477,23 @@ def _get_activation_fn(activation):
     elif activation == "gelu":
         return F.gelu
 
-    raise RuntimeError("activation should be relu/gelu/elu, not {}".format(activation))
+    raise RuntimeError("activation should be relu/elu/gelu, not {}".format(activation))
 
 
 class PositionalEncoding(nn.Module):
+    r"""Positional Encoding layer is made up of sinusoidal encoding mechanisms.
+    This standard positional encoding is based on the paper "Attention Is All You Need".
+    Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez,
+    Lukasz Kaiser, and Illia Polosukhin. 2017. Attention is all you need. In Advances in
+    Neural Information Processing Systems, pages 6000-6010. Users may modify or implement
+    in a different way during application.
+
+    Args:
+        d_model: the number of expected features in the input (required).
+        dropout: the dropout value (default=0.2).
+        max_len: maximum token length (default=5000).
+    """
+
     def __init__(self, d_model, dropout=0.2, max_len=5000):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
@@ -485,5 +509,9 @@ class PositionalEncoding(nn.Module):
         self.register_buffer("pe", pe)
 
     def forward(self, x):
+        r"""Calculates the positional encoding for input tensor in the forward pass
+        Args:
+            x: input tensor
+        """
         x = x + self.pe[: x.size(0), :]
         return self.dropout(x)
