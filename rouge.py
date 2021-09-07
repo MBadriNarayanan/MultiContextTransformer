@@ -344,3 +344,4 @@ def rouge(hypotheses, references):
         "rouge_l/r_score": rouge_l_r,
         "rouge_l/p_score": rouge_l_p,
     }
+
