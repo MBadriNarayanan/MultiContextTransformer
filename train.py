@@ -1,28 +1,29 @@
-import json
-import pandas as pd
-import numpy as np
-import pickle
-from tqdm import tqdm
-from datetime import datetime
-import sys
 import fasttext
 import fasttext.util
+import json
 import nltk
+import pickle
 import spacy
-from nltk import word_tokenize
+import sys
+import torch
+import torch.cuda
+
+import numpy as np
+import pandas as pd
+import torch.nn as nn
+
+from bleu import *
+from MultiContextTransformer import *
+from rouge import *
+from slt_data import *
+
+from datetime import datetime
+from torch.nn.init import xavier_uniform_
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 nltk.download("punkt")
 nltk.download("stopwords")
-
-from slt_data import *
-from MultiContextTransformer import *
-
-from torch.utils.data import DataLoader
-import torch
-import torch.cuda
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.nn.init import xavier_uniform_
 
 
 def load_dictionary(nlp, dataframe, filename: str):
@@ -176,7 +177,6 @@ def main():
         dataframe=dataframe,
         word_dict=word_dict,
         nlp=nlp,
-        vector_drop_flag=hyper_params["training"]["dropping_vectors"],
     )
     params = {"batch_size": 1, "shuffle": False, "num_workers": 0}
     train_gen = DataLoader(traindataset, **params)
@@ -253,7 +253,7 @@ def main():
     ):
         epoch_loss = 0.0
         btch = 1
-        for i, generator_values in enumerate(train_gen):
+        for _, generator_values in enumerate(train_gen):
             inputs = generator_values[0]
             span8src = inputs[0][0].to(device)
             span12src = inputs[1][0].to(device)
