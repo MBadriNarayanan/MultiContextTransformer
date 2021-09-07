@@ -63,15 +63,6 @@ class MultiContextTransformer(Module):
             self.device
         )
 
-    def create_source_mask(self, source):
-        batch_size = source.shape[0]
-        sequence_size = source.shape[1]
-        embedding_dim = source.shape[2]
-        zeros = torch.zeros((batch_size, sequence_size)).to(self.device)
-        src_mask = (source == zeros).to(self.device)
-
-        return src_mask
-
     def create_target_mask(self, target):
 
         target_mask = (
