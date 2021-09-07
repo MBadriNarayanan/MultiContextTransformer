@@ -28,7 +28,6 @@
         "embeddingDimensions": 0
     },
     "training": {
-        "dropping_vectors": 0,
         "learningRate": 0E0,
         "flag_continue": 0,
         "start_epoch": 0,
