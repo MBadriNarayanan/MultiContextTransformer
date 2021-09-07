@@ -1,30 +1,27 @@
-import json
-import pandas as pd
-import numpy as np
-import pickle
-from tqdm import tqdm
-import sys
 import fasttext
 import fasttext.util
+import json
 import nltk
+import pickle
 import spacy
-from nltk import word_tokenize
+import sys
+import torch
+import torch.cuda
+
+import numpy as np
+import pandas as pd
+
+from bleu import *
+from MultiContextTransformer import *
+from rouge import *
+from slt_data import *
+
+from torch.nn.functional import log_softmax
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 nltk.download("punkt")
 nltk.download("stopwords")
-
-from slt_data import *
-from MultiContextTransformer import *
-
-from torch.utils.data import DataLoader
-import torch
-import torch.cuda
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.nn.init import xavier_uniform_
-from torch.nn.functional import log_softmax
-from bleu import *
-from rouge import *
 
 
 def load_dictionary(nlp, dataframe, filename: str):
@@ -224,7 +221,6 @@ def main():
         dataframe=dataframe,
         word_dict=word_dict,
         nlp=nlp,
-        vector_drop_flag=hyper_params["training"]["dropping_vectors"],
     )
     params = {"batch_size": 1, "shuffle": False, "num_workers": 0}
     test_gen = DataLoader(test_dataset, **params)
@@ -241,7 +237,6 @@ def main():
     dropout = hyper_params["model"]["dropout"]
     activation = hyper_params["model"]["activation"]
     flag_pretrained = hyper_params["model"]["pretrained"]
-    flag_continue = hyper_params["training"]["flag_continue"]
     concat_input = 3 * dmodel_encoder
     concat_output = dmodel_decoder
 
@@ -264,15 +259,13 @@ def main():
         device=device,
     ).to(device)
 
-    criterion = nn.CrossEntropyLoss().cuda()
     optimizer = torch.optim.SGD(
         model.parameters(), lr=hyper_params["training"]["learningRate"]
     )
     checkpoint = torch.load(hyper_params["evaluation"]["checkpointToLoad"])
     model.load_state_dict(checkpoint["model_state_dict"])
     optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
-    epoch = checkpoint["epoch"]
-    loss = checkpoint["loss"]
+
     model.eval()
     model_validation(
         dataset_generator=test_gen,
