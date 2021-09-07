@@ -130,5 +130,4 @@ def compute_cvpr_bleu(hyps, refs, max_order=4):
             reference_length,
         ) = compute_bleu(tokenized_refs, tokenized_hyps, max_order=i)
         bleu_all_orders.append(round(bleu * 100, 2))
-
     return bleu_all_orders
