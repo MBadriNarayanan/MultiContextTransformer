@@ -1,16 +1,15 @@
 import torch
-from torch.utils.data import Dataset
 from torch.nn.utils.rnn import pad_sequence
+from torch.utils.data import Dataset
 
 
 class SLT_Dataset(Dataset):
-    def __init__(self, nlp, dataframe, word_dict, vector_drop_flag):
+    def __init__(self, nlp, dataframe, word_dict):
         self.dataframe = dataframe
         self.word_dict = word_dict
         self.span8 = "Span8/span=8_stride=2/"
         self.span12 = "Span12/span=12_stride=2/"
         self.span16 = "Span16/span=16_stride=2/"
-        self.vector_drop_flag = vector_drop_flag
         self.nlp = nlp
 
     def __len__(self):
@@ -25,19 +24,6 @@ class SLT_Dataset(Dataset):
         token_tensor = torch.FloatTensor(l)
         return token_tensor
 
-    def vector_drop(self, span_tensor, idx_drop):
-        idx = []
-        span_tensor = span_tensor[:, :-2, :]
-        if span_tensor.shape[1] > 50:
-            allowed_len = span_tensor.shape[1] - (span_tensor.shape[1] % 5)
-            for i in range(allowed_len):
-                if (i + 1) % 5 == idx_drop:
-                    continue
-                else:
-                    idx.append(i)
-            span_tensor = span_tensor[:, idx, :]
-        return span_tensor
-
     def __getitem__(self, idx):
         filename = self.dataframe.iloc[idx]["name"]
         translation = self.dataframe.iloc[idx]["translation"]
@@ -46,8 +32,4 @@ class SLT_Dataset(Dataset):
         span12_tensor = pad_sequence(torch.load(self.span12 + filename + ".pt"))
         span16_tensor = pad_sequence(torch.load(self.span16 + filename + ".pt"))
 
-        if self.vector_drop_flag == 1:
-            span8_tensor = self.vector_drop(span8_tensor, 0)
-            span12_tensor = self.vector_drop(span12_tensor, 0)
-            span16_tensor = self.vector_drop(span16_tensor, 0)
         return ((span8_tensor, span12_tensor, span16_tensor), translation_tokens)
