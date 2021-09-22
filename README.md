@@ -11,4 +11,4 @@ Publication Link: To be updated.
 Citation: To be updated.
 
 
-Authors: [M Badri Narayanan](https://github.com/MBadriNarayanan), [Mahesh Bharadwaj K](https://github.com/MaheshBharadwaj), [Nithin G R](https://github.com/nithin-gr), [Dhiganth Rao Padamnoor](https://github.com/dhiganthrao), [Vineeth Vijayaraghavan](https://www.linkedin.com/in/vineethv)
+Authors: [M Badri Narayanan](https://www.linkedin.com/in/mbadrinarayanan), [Mahesh Bharadwaj K](https://github.com/MaheshBharadwaj), [Nithin G R](https://github.com/nithin-gr), [Dhiganth Rao Padamnoor](https://github.com/dhiganthrao), [Vineeth Vijayaraghavan](https://www.linkedin.com/in/vineethv)
