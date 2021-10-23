@@ -6,7 +6,6 @@ We discuss an efficient solution to continuous sign language translation in our 
 
 Paper published in Springer Lecture Notes in Artificial Intelligence (LNAI).
 
-DoI Link: https://doi.org/10.1007/978-3-030-89820-5_25
 
 Publication Link: https://link.springer.com/chapter/10.1007/978-3-030-89820-5_25
 
