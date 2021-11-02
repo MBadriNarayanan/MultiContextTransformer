@@ -15,18 +15,21 @@ Authors: [M Badri Narayanan](https://www.linkedin.com/in/mbadrinarayanan), [Mahe
 
 Citation
 ```
- @InProceedings{10.1007/978-3-030-89820-5_25,
+@InProceedings{10.1007/978-3-030-89820-5_25,
 author="Narayanan, M. Badri
 and Bharadwaj, K. Mahesh
 and Nithin, G. R.
 and Padamnoor, Dhiganth Rao
 and Vijayaraghavan, Vineeth",
+editor="Batyrshin, Ildar
+and Gelbukh, Alexander
+and Sidorov, Grigori",
 title="Sign Language Translation Using Multi Context Transformer",
 booktitle="Advances in Soft Computing",
 year="2021",
 publisher="Springer International Publishing",
 address="Cham",
 pages="311--324",
-isbn="978-3-030-89820-5"
 }
+
 ```
